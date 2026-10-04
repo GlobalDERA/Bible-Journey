@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Bible Journey",
+    "slug": "bible-journey",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "biblejourney",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#FFFDF7"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.biblejourney.app"
+    },
+    "android": {
+      "package": "com.biblejourney.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-audio"
+    ]
+  }
+}

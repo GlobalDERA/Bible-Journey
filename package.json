@@ -1,0 +1,11 @@
+{
+  "name": "bible-journey",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Bible Journey - Your guided journey through the Bible. Phase 0 foundation. NOTE: app/ and web/ install separately (no workspaces) to avoid Metro conflicts for beginners.",
+  "scripts": {
+    "start:app": "cd app && npx expo start -c",
+    "start:web": "cd web && npm run dev",
+    "install:app": "cd app && npm install --legacy-peer-deps"
+  }
+}
