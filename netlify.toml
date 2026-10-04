@@ -1,6 +1,12 @@
-# Netlify deploy for assessment Q1 - static export (no 404)
-# web/next.config.js uses output: export -> builds to web/out
+# Netlify deploys FULL Expo app (same as phone) - not just landing
+# app/app.json already has web.output static -> `npx expo export` builds to app/dist
 [build]
-  base = "web"
-  command = "npm install && npm run build"
-  publish = "out"
+  base = "app"
+  command = "npm install --legacy-peer-deps && npx expo export --platform web"
+  publish = "dist"
+
+# Fixes Expo Router deep links on Netlify (e.g. /study, /reader refresh)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
