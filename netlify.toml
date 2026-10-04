@@ -1,0 +1,9 @@
+# Netlify deploy for assessment Q1
+# Deploys web/ landing (Next.js) as live site. Expo app stays for phone.
+[build]
+  base = "web"
+  command = "npm install && npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
