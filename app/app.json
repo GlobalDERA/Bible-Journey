@@ -16,7 +16,13 @@
       "bundleIdentifier": "com.biblejourney.app"
     },
     "android": {
-      "package": "com.biblejourney.app"
+      "package": "com.biblejourney.app",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +43,13 @@
       "expo-router",
       "expo-secure-store",
       "expo-audio"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6bc00e48-1fed-4c10-aa6c-f0d3714c0f8f"
+      }
+    },
+    "owner": "globaldera"
   }
 }
