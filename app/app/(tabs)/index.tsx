@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card } from '../../components/Card';
 import { PrimaryButton } from '../../components/PrimaryButton';
+import { InstallButton as InstallBanner } from '../../components/InstallButton';
 import { Colors } from '../../constants/theme';
 import { useJourneyStore } from '../../store/journeyStore';
 import { useAuthStore } from '../../store/authStore';
@@ -72,6 +73,8 @@ export default function HomeScreen() {
       <PrimaryButton title="Start Reading" onPress={() => router.push(`/reader?day=${today.day_number}` as any)} />
 
       <PrimaryButton title="Give 💛" onPress={() => router.push('/giving' as any)} />
+
+      <InstallBanner />
 
       <Card title="Daily reminder (free)" subtitle="Gentle nudge, never shame">
         <Text style={styles.demoLink} onPress={async () => {

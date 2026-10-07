@@ -19,7 +19,12 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "themeColor": "#2B4C7E",
+      "backgroundColor": "#FFFDF7",
+      "name": "Bible Journey",
+      "shortName": "BibleJourney",
+      "description": "Read the Bible. Understand the Bible. Remember the Bible."
     },
     "platforms": [
       "ios",
