@@ -1,9 +1,16 @@
 // INSTALL BUTTON - PWA one-tap install, top-right (web only)
-// Always clickable: tries auto-install, else shows steps. Fixed hooks order.
+// Always responds: uses window.alert on web (Alert.alert fails silently on web).
+// Auto-install appears only when manifest + 192/512 icons exist (see guide).
 
 import React, { useEffect, useState } from 'react';
-import { Platform, TouchableOpacity, Text, Alert } from 'react-native';
+import { Platform, TouchableOpacity, Text } from 'react-native';
 import { Colors } from '../constants/theme';
+
+function webAlert(title: string, msg: string) {
+  if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+    window.alert(`${title}\n\n${msg}`);
+  }
+}
 
 export function InstallButton() {
   const [canInstall, setCanInstall] = useState(false);
@@ -36,11 +43,13 @@ export function InstallButton() {
       return;
     }
     if (isIOS) {
-      Alert.alert('Install on iPhone', 'Tap Share ⎙ → Add to Home Screen → Add. Then open Bible Journey from your home screen!');
+      webAlert('Install on iPhone', 'Tap Share (box with arrow) → Add to Home Screen → Add.\nThen open Bible Journey from your home screen - works like a real app!');
+    } else if (canInstall) {
+      webAlert('Install', 'Tap Install in the popup.');
     } else {
-      Alert.alert(
+      webAlert(
         'Install Bible Journey',
-        canInstall ? 'Tap Install below.' : 'Browser menu ⋮ → Install app / Add to Home screen. Tip: visit twice + add 512 icon for auto-button.'
+        'Chrome menu ⋮ → Install app / Add to Home screen.\n\nIf no Install option: need logo192.png + logo512.png in app/public/ (see guide - 5 min in Canva), then redeploy. Until then manual Add to Home screen still works and app functions normally online.'
       );
     }
   };
