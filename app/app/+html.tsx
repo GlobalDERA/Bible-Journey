@@ -14,6 +14,12 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="theme-color" content="#2B4C7E" />
         <meta name="description" content="Bible Journey - Read the Bible. Understand the Bible. Remember the Bible." />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/logo192.png" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('/sw.js').catch(function(e){ console.log('SW failed', e); }); }); }`,
+          }}
+        />
         <ScrollViewStyleReset />
       </head>
       <body>{children}</body>

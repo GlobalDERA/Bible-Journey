@@ -49,7 +49,7 @@ export function InstallButton() {
     } else {
       webAlert(
         'Install Bible Journey',
-        'Chrome menu ⋮ → Install app / Add to Home screen.\n\nIf no Install option: need logo192.png + logo512.png in app/public/ (see guide - 5 min in Canva), then redeploy. Until then manual Add to Home screen still works and app functions normally online.'
+        'Chrome menu ⋮ → Install app / Add to Home screen.\n\nStill no option? Close ALL tabs of this site, reopen fresh, tap Install again (browser must see new manifest + icons). Manual Add to Home screen installs the full working app either way.'
       );
     }
   };
