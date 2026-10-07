@@ -21,6 +21,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
+      "favicon": "./public/logo192.png",
       "themeColor": "#2B4C7E",
       "backgroundColor": "#FFFDF7",
       "name": "Bible Journey",
