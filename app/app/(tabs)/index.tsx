@@ -56,7 +56,10 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.greeting}>{getGreeting()}</Text>
+      <View style={styles.topRow}>
+        <Text style={styles.greeting}>{getGreeting()}</Text>
+        <InstallBanner />
+      </View>
 
       {showWelcomeBack && (
         <Card title="Welcome back. You haven't lost your progress." subtitle={`You missed ${missedCount} days. No guilt — pick a kind way back.`}>
@@ -73,8 +76,6 @@ export default function HomeScreen() {
       <PrimaryButton title="Start Reading" onPress={() => router.push(`/reader?day=${today.day_number}` as any)} />
 
       <PrimaryButton title="Give 💛" onPress={() => router.push('/giving' as any)} />
-
-      <InstallBanner />
 
       <Card title="Daily reminder (free)" subtitle="Gentle nudge, never shame">
         <Text style={styles.demoLink} onPress={async () => {
@@ -98,8 +99,9 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.paper, padding: 16 },
+  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginVertical: 12 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.paper },
-  greeting: { fontSize: 26, fontWeight: '800', color: Colors.ink, marginVertical: 12 },
+  greeting: { fontSize: 26, fontWeight: '800', color: Colors.ink },
   bar: { fontSize: 16, marginTop: 8, color: Colors.primary },
   reading: { fontSize: 18, fontWeight: '700', marginTop: 8, color: Colors.ink },
   time: { fontSize: 14, color: Colors.muted, marginTop: 4 },
