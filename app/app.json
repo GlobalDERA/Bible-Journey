@@ -4,6 +4,7 @@
     "slug": "bible-journey",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "scheme": "biblejourney",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
