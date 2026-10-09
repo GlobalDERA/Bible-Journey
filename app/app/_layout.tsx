@@ -10,15 +10,16 @@ const queryClient = new QueryClient();
 
 // Crash catcher: if JS breaks in production (MIUI "keeps stopping"),
 // show the error ON SCREEN instead of silent OS kill. Copy the red text to us!
-class CrashCatcher extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
-  state = { error: null as Error | null };
+class CrashCatcher extends React.Component<{ children: React.ReactNode }, { error: Error | null; stack: string }> {
+  state = { error: null as Error | null, stack: '' };
 
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
 
-  componentDidCatch(error: Error) {
-    console.log('[Crash]', error.message, error.stack?.slice(0, 500));
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.log('[Crash]', error.message, (info.componentStack || '').slice(0, 800));
+    this.setState({ stack: info.componentStack || '' });
   }
 
   render() {
@@ -30,7 +31,7 @@ class CrashCatcher extends React.Component<{ children: React.ReactNode }, { erro
           <Text selectable style={{ color: '#D32F2F', marginTop: 12, fontSize: 13 }}>
             {this.state.error.message}
             {'\n\n'}
-            {(this.state.error.stack || '').slice(0, 800)}
+            {(this.state.stack || this.state.error.stack || '').slice(0, 1200)}
           </Text>
         </ScrollView>
       );
