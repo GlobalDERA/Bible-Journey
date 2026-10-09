@@ -17,6 +17,9 @@ export function InstallButton() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // Phone builds have NO browser window - exit before touching window/navigator.
+    // (React Native defines look-alike globals without addEventListener, which crashed real APKs.)
+    if (Platform.OS !== 'web') return;
     if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
     const ua = navigator.userAgent || '';
     if (/iPhone|iPad|iPod/i.test(ua)) setIsIOS(true);
