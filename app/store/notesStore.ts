@@ -33,6 +33,7 @@ type NotesState = {
   bookmarks: Bookmark[];
   notes: Note[];
   addHighlight: (passage_ref: string, verse: number, text: string, color?: string) => void;
+  removeHighlight: (passage_ref: string, verse: number) => void;
   addBookmark: (passage_ref: string) => void;
   removeBookmark: (passage_ref: string) => void;
   addNote: (passage_ref: string, content: string, tags?: string[]) => void;
@@ -52,8 +53,18 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   notes: [],
 
   addHighlight: (passage_ref, verse, text, color = '#FFF176') => {
+    const existing = get().highlights.find((h) => h.passage_ref === passage_ref && h.verse === verse);
+    if (existing) {
+      // Switch color on retap instead of duplicating
+      set({ highlights: get().highlights.map((h) => (h.id === existing.id ? { ...h, color, text } : h)) });
+      return;
+    }
     const h: Highlight = { id: uid(), passage_ref, verse, text, color, created_at: new Date().toISOString() };
     set({ highlights: [...get().highlights, h] });
+  },
+
+  removeHighlight: (passage_ref, verse) => {
+    set({ highlights: get().highlights.filter((h) => !(h.passage_ref === passage_ref && h.verse === verse)) });
   },
 
   addBookmark: (passage_ref) => {

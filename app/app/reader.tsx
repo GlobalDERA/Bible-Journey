@@ -76,6 +76,8 @@ export default function ReaderScreen() {
       <Text style={styles.title}>{day.title}</Text>
       <Text style={styles.time}>~{day.estimated_minutes} min • KJV sample</Text>
 
+      <PrimaryButton title={`Listen 🎧 Full Day (${day.chapters.length || 1} chapters)`} onPress={() => router.push(`/audio?refs=${encodeURIComponent((day.chapters.length > 0 ? day.chapters : [day.title]).join(','))}` as any)} />
+
       {sections.map((sec) => (
         <View key={sec.ref} style={styles.section}>
           <Text style={styles.ref}>{sec.ref}</Text>
@@ -131,8 +133,6 @@ export default function ReaderScreen() {
           Alert.alert('Saved!', `${ref} note added to your memory.`);
         }}
       />
-
-      <PrimaryButton title={`Listen 🎧 Full Day (${day.chapters.length || 1} chapters)`} onPress={() => router.push(`/audio?refs=${encodeURIComponent((day.chapters.length > 0 ? day.chapters : [day.title]).join(','))}` as any)} />
 
       <PrimaryButton title={alreadyDone ? 'Back to Home' : 'Mark Complete ✓'} onPress={() => (alreadyDone ? router.push('/(tabs)' as any) : handleComplete())} />
       <View style={{ height: 40 }} />

@@ -1,17 +1,27 @@
 import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
 
-// Bottom navigation from your PRD Section 23:
-// Home | Bible | Journey | Explore | Profile
+// Bottom navigation from your PRD Section 23 with icons:
+// 🏠 Home | 📖 Bible | 🗺️ Journey | 🔍 Explore | 👤 Profile
+
+const ICONS: Record<string, string> = {
+  index: '🏠',
+  bible: '📖',
+  journey: '🗺️',
+  explore: '🔍',
+  profile: '👤',
+};
 
 export default function TabsLayout() {
   return (
     <Tabs
-      screenOptions={{
+      screenOptions={({ route }) => ({
         tabBarActiveTintColor: '#2B4C7E',
         tabBarInactiveTintColor: '#6B7280',
         headerStyle: { backgroundColor: '#FFFDF7' },
         tabBarStyle: { backgroundColor: '#FFFFFF' },
-      }}
+        tabBarIcon: ({ focused }) => <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>{ICONS[route.name] ?? '•'}</Text>,
+      })}
     >
       <Tabs.Screen name="index" options={{ title: 'Home' }} />
       <Tabs.Screen name="bible" options={{ title: 'Bible' }} />

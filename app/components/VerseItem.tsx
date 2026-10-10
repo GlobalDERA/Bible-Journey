@@ -1,5 +1,5 @@
-// VERSE ITEM - tap any verse: 4 colors, save, note, copy, share.
-// Beginner: tap verse -> menu opens under it. Tap color = highlight + save instantly.
+// VERSE ITEM - tap any verse: 4 colors (tap again to switch/cancel), save, note, copy, share.
+// Retap active color or ✕ = remove highlight. Copy button flips to "Copied ✓" for 2s.
 
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Share, Alert, Platform } from 'react-native';
@@ -36,7 +36,8 @@ export function VerseItem({
   onNote: (ref: string, verse: number, text: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { highlights, addHighlight } = useNotesStore();
+  const [copied, setCopied] = useState(false);
+  const { highlights, addHighlight, removeHighlight } = useNotesStore();
   const mine = highlights.find((h) => h.passage_ref === passageRef && h.verse === verse);
 
   const full = `${passageRef}:${verse} - ${text}`;
@@ -49,9 +50,19 @@ export function VerseItem({
 
   const handleCopy = () => {
     if (copyText(full)) {
-      Alert.alert('Copied! 📋', full.slice(0, 100));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } else {
       Alert.alert('Copy manually', full);
+    }
+  };
+
+  const handleColor = (c: string) => {
+    if (mine && mine.color === c) {
+      // Retap active color = cancel highlight
+      removeHighlight(passageRef, verse);
+    } else {
+      addHighlight(passageRef, verse, text, c);
     }
   };
 
@@ -70,21 +81,30 @@ export function VerseItem({
             {HIGHLIGHT_COLORS.map((c) => (
               <TouchableOpacity
                 key={c}
+                onPress={() => handleColor(c)}
+                style={[styles.dot, { backgroundColor: c }, mine?.color === c && styles.dotActive]}
+              >
+                {mine?.color === c && <Text style={styles.check}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+            {mine && (
+              <TouchableOpacity
+                style={styles.removeBtn}
                 onPress={() => {
-                  addHighlight(passageRef, verse, text, c);
+                  removeHighlight(passageRef, verse);
                   setOpen(false);
                 }}
-                style={[styles.dot, { backgroundColor: c }]}
-              />
-            ))}
+              >
+                <Text>✕ Remove</Text>
+              </TouchableOpacity>
+            )}
           </View>
           <View style={styles.actions}>
             <TouchableOpacity
               style={styles.btn}
               onPress={() => {
-                addHighlight(passageRef, verse, text);
+                addHighlight(passageRef, verse, text, mine?.color ?? '#FFF176');
                 setOpen(false);
-                Alert.alert('Saved ⭐', `${passageRef}:${verse} highlighted.`);
               }}
             >
               <Text>⭐ Save</Text>
@@ -99,7 +119,7 @@ export function VerseItem({
               <Text>📝 Note</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.btn} onPress={handleCopy}>
-              <Text>📋 Copy</Text>
+              <Text>{copied ? 'Copied ✓' : '📋 Copy'}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.btn} onPress={handleShare}>
               <Text>↗ Share</Text>
@@ -115,8 +135,11 @@ const styles = StyleSheet.create({
   verse: { fontFamily: 'Georgia', fontSize: 17, lineHeight: 27, color: Colors.ink, marginBottom: 8, borderRadius: 6, padding: 2 },
   num: { color: Colors.gold, fontWeight: '700', fontSize: 13 },
   menu: { backgroundColor: '#F3F4F6', borderRadius: 10, padding: 10, marginBottom: 10 },
-  colors: { flexDirection: 'row', marginBottom: 8 },
-  dot: { width: 32, height: 32, borderRadius: 16, marginRight: 10, borderWidth: 1, borderColor: '#D1D5DB' },
+  colors: { flexDirection: 'row', marginBottom: 8, alignItems: 'center' },
+  dot: { width: 32, height: 32, borderRadius: 16, marginRight: 10, borderWidth: 1, borderColor: '#D1D5DB', alignItems: 'center', justifyContent: 'center' },
+  dotActive: { borderWidth: 3, borderColor: Colors.primary },
+  check: { fontWeight: '800', color: Colors.ink },
+  removeBtn: { backgroundColor: '#fff', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, borderWidth: 1, borderColor: '#E5E7EB' },
   actions: { flexDirection: 'row', justifyContent: 'space-between' },
   btn: { backgroundColor: '#fff', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, borderWidth: 1, borderColor: '#E5E7EB' },
 });
