@@ -160,3 +160,25 @@ export async function stopAudio(): Promise<void> {
     currentSound = null;
   } catch {}
 }
+
+// Whole-day audio: combines all chapters into one reading (TTS).
+// Human mp3 plays per-chapter when single; whole day uses warm robot voice reading all.
+export async function speakDay(refs: string[], speed: number = 1): Promise<string> {
+  if (refs.length === 1) return speakPassage(refs[0], speed);
+  const parts: string[] = [];
+  for (const r of refs) {
+    const verses = getChapterText(r);
+    parts.push(`${r}. ${verses.map((v) => v.text).join(' ')}`);
+  }
+  const full = parts.join(' ');
+  if (!Speech) {
+    return `Audio not installed yet. Run: npx expo install expo-speech expo-audio. Would read ${refs.length} chapters at ${speed}x.`;
+  }
+  try {
+    await Speech.stop();
+    await Speech.speak(full.slice(0, 8000), { rate: speed, language: 'en' });
+    return `Playing full day: ${refs.join(', ')} at ${speed}x`;
+  } catch (e) {
+    return `Audio error: ${String(e).slice(0, 100)}`;
+  }
+}

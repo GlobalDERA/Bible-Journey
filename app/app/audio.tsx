@@ -7,22 +7,27 @@ import { useLocalSearchParams } from 'expo-router';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Card } from '../components/Card';
 import { Colors } from '../constants/theme';
-import { speakPassage, stopAudio, isAudioReady, AUDIO_SPEEDS } from '../lib/audioService';
+import { speakPassage, speakDay, stopAudio, isAudioReady, AUDIO_SPEEDS } from '../lib/audioService';
 import { getChapterText } from '../lib/bibleService';
 import { useNotesStore } from '../store/notesStore';
 
 export default function AudioScreen() {
   const params = useLocalSearchParams();
-  const ref = String(params.ref || 'Genesis 1');
+  // Whole day: ?refs=Genesis 1,Genesis 2  |  Single: ?ref=Genesis 1 (old links still work)
+  const refsParam = String(params.refs || '');
+  const singleRef = String(params.ref || 'Genesis 1');
+  const refs = refsParam ? refsParam.split(',').map((s) => s.trim()).filter(Boolean) : [singleRef];
+  const isDay = refs.length > 1;
+  const title = isDay ? `Day: ${refs[0]} +${refs.length - 1} more` : `${refs[0]} Audio`;
   const [speed, setSpeed] = useState(1);
   const [status, setStatus] = useState('Ready. Tap Play.');
   const [currentVerse, setCurrentVerse] = useState(1);
   const { addBookmark } = useNotesStore();
-  const verses = getChapterText(ref);
+  const verses = refs.flatMap((r) => getChapterText(r).map((v) => ({ ...v, chapter: r })));
 
   const handlePlay = async () => {
     setStatus('Loading...');
-    const msg = await speakPassage(ref, speed);
+    const msg = isDay ? await speakDay(refs, speed) : await speakPassage(refs[0], speed);
     setStatus(msg);
     if (!isAudioReady()) {
       Alert.alert('Audio setup needed', 'Run: npx expo install expo-speech, then restart. Text shown below still works.');
@@ -31,8 +36,8 @@ export default function AudioScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.small}>Listen + Read</Text>
-      <Text style={styles.title}>{ref} Audio</Text>
+      <Text style={styles.small}>{isDay ? `Listen to full day (${refs.length} chapters)` : 'Listen + Read'}</Text>
+      <Text style={styles.title}>{title}</Text>
       <Text style={styles.status}>{status}</Text>
 
       <View style={styles.speedRow}>
@@ -46,11 +51,11 @@ export default function AudioScreen() {
       <PrimaryButton title="▶ Play" onPress={handlePlay} />
       <PrimaryButton title="⏸ Stop" onPress={() => { stopAudio(); setStatus('Stopped.'); }} />
 
-      <Card title="Follow along" subtitle="Tap a verse to mark where you are">
-        {verses.map((v) => (
-          <TouchableOpacity key={v.verse} onPress={() => setCurrentVerse(v.verse)}>
+      <Card title={isDay ? `Follow along (${refs.length} chapters)` : 'Follow along'} subtitle="Tap a verse to mark where you are">
+        {verses.map((v: any) => (
+          <TouchableOpacity key={`${v.chapter}-${v.verse}`} onPress={() => setCurrentVerse(v.verse)}>
             <Text style={[styles.verse, currentVerse === v.verse && styles.current]}>
-              {v.verse}. {v.text}
+              {isDay ? `${v.chapter}:${v.verse} ` : `${v.verse}. `}{v.text}
             </Text>
           </TouchableOpacity>
         ))}
@@ -59,8 +64,8 @@ export default function AudioScreen() {
       <PrimaryButton
         title="🔖 Bookmark this moment"
         onPress={() => {
-          addBookmark(`${ref}:${currentVerse}`);
-          Alert.alert('Bookmarked!', `${ref}:${currentVerse} saved.`);
+          addBookmark(`${refs[0]}:${currentVerse}`);
+          Alert.alert('Bookmarked!', `${refs[0]}:${currentVerse} saved.`);
         }}
       />
       <View style={{ height: 40 }} />

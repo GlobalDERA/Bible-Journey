@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, TextInput, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { VerseItem } from '../components/VerseItem';
 import { Colors } from '../constants/theme';
 import { useJourneyStore } from '../store/journeyStore';
 import { useNotesStore } from '../store/notesStore';
@@ -17,7 +18,7 @@ export default function ReaderScreen() {
   const dayNum = Number(params.day || 1);
 
   const { days, completeDay, completedDays, setCurrentDay } = useJourneyStore();
-  const { addHighlight, addBookmark, addNote } = useNotesStore();
+  const { addBookmark, addNote } = useNotesStore();
   const [noteText, setNoteText] = useState('');
   const [cloudSections, setCloudSections] = useState<{ ref: string; verses: { verse: number; text: string }[] }[] | null>(null);
   const day = days.find((d) => d.day_number === dayNum);
@@ -78,12 +79,33 @@ export default function ReaderScreen() {
       {sections.map((sec) => (
         <View key={sec.ref} style={styles.section}>
           <Text style={styles.ref}>{sec.ref}</Text>
+          <Text style={styles.tapHint}>Tap any verse for colors, note, copy, share 👇</Text>
           {sec.verses.map((v) => (
-            <Text key={`${sec.ref}-${v.verse}`} style={styles.verse}>
-              <Text style={styles.num}>{v.verse} </Text>
-              {v.text}
-            </Text>
+            <VerseItem
+              key={`${sec.ref}-${v.verse}`}
+              passageRef={sec.ref}
+              verse={v.verse}
+              text={v.text}
+              onNote={(ref, vs, txt) => setNoteText(`${ref}:${vs} – `)}
+            />
           ))}
+          <View style={styles.saveRow}>
+            <TouchableOpacity style={styles.saveBtn} onPress={() => router.push(`/study?ref=${encodeURIComponent(sec.ref)}` as any)}>
+              <Text>📖 Explore {sec.ref}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.saveBtn}
+              onPress={() => {
+                addBookmark(sec.ref);
+                Alert.alert('Bookmarked ❤️', `${sec.ref} saved. See Profile -> Memory.`);
+              }}
+            >
+              <Text>🔖 Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveBtn} onPress={() => router.push(`/memory?ref=${encodeURIComponent(sec.ref)}` as any)}>
+              <Text>📖 Memory →</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ))}
 
@@ -93,50 +115,24 @@ export default function ReaderScreen() {
         <Text style={styles.reflect}>Reflect: What stood out to you? Write below - it becomes memory!</Text>
       )}
 
-      {sections.map((sec) => (
-        <View key={`${sec.ref}-save`} style={styles.saveRow}>
-          <TouchableOpacity
-            style={styles.saveBtn}
-            onPress={() => {
-              addHighlight(sec.ref, sec.verses[0]?.verse ?? 1, sec.verses[0]?.text ?? sec.ref);
-              Alert.alert('Highlighted ⭐', `${sec.ref} saved to memory.`);
-            }}
-          >
-            <Text>⭐ Highlight</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.saveBtn}
-            onPress={() => {
-              addBookmark(sec.ref);
-              Alert.alert('Bookmarked ❤️', `${sec.ref} saved. See Profile -> Memory.`);
-            }}
-          >
-            <Text>🔖 Save</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.saveBtn} onPress={() => router.push(`/memory?ref=${encodeURIComponent(sec.ref)}` as any)}>
-            <Text>📖 Memory →</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-
-      <TextInput placeholder="What stood out? (e.g. covenant...)" value={noteText} onChangeText={setNoteText} style={styles.noteInput} multiline />
+      <TextInput placeholder="What stood out? (tap 📝 Note on any verse to start here...)" value={noteText} onChangeText={setNoteText} style={styles.noteInput} multiline />
       <PrimaryButton
         title="Save Note 📝"
         onPress={() => {
           if (!noteText.trim()) {
-            Alert.alert('Write something first');
+            Alert.alert('Write something first (or tap 📝 Note on a verse)');
             return;
           }
-          const ref = day.chapters[0] || day.title;
+          // If note starts with "Ref:V – ", save to that chapter; else first chapter
+          const m = noteText.match(/^(.+?):(\d+)\s*[–-]/);
+          const ref = m ? m[1] : day.chapters[0] || day.title;
           addNote(ref, noteText, ['Reflection']);
           setNoteText('');
           Alert.alert('Saved!', `${ref} note added to your memory.`);
         }}
       />
 
-      <PrimaryButton title={`Explore ${day.chapters[0] || day.title} 📖`} onPress={() => router.push(`/study?ref=${encodeURIComponent(day.chapters[0] || day.title)}` as any)} />
-
-      <PrimaryButton title={`Listen 🎧 ${day.chapters[0] || day.title}`} onPress={() => router.push(`/audio?ref=${encodeURIComponent(day.chapters[0] || day.title)}` as any)} />
+      <PrimaryButton title={`Listen 🎧 Full Day (${day.chapters.length || 1} chapters)`} onPress={() => router.push(`/audio?refs=${encodeURIComponent((day.chapters.length > 0 ? day.chapters : [day.title]).join(','))}` as any)} />
 
       <PrimaryButton title={alreadyDone ? 'Back to Home' : 'Mark Complete ✓'} onPress={() => (alreadyDone ? router.push('/(tabs)' as any) : handleComplete())} />
       <View style={{ height: 40 }} />
@@ -151,7 +147,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 26, fontWeight: '800', color: Colors.ink, marginTop: 4 },
   time: { color: Colors.muted, marginTop: 4, marginBottom: 12 },
   section: { backgroundColor: '#fff', borderRadius: 14, padding: 16, marginVertical: 8 },
-  ref: { fontSize: 18, fontWeight: '700', color: Colors.primary, marginBottom: 10 },
+  ref: { fontSize: 18, fontWeight: '700', color: Colors.primary, marginBottom: 4 },
+  tapHint: { fontSize: 12, color: Colors.muted, marginBottom: 10 },
   verse: { fontFamily: 'Georgia', fontSize: 17, lineHeight: 27, color: Colors.ink, marginBottom: 8 },
   num: { color: Colors.gold, fontWeight: '700', fontSize: 13 },
   reflect: { fontStyle: 'italic', color: Colors.muted, marginVertical: 12, textAlign: 'center' },
